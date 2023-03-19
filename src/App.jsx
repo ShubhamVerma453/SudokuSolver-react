@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import Header from "./components/Header";
-import Footer from "./components/Footer";
 
-const board = [
+const emptySudoku = [
     [-1, -1, -1, -1, -1, -1, -1, -1, -1],
     [-1, -1, -1, -1, -1, -1, -1, -1, -1],
     [-1, -1, -1, -1, -1, -1, -1, -1, -1],
@@ -13,18 +12,16 @@ const board = [
     [-1, -1, -1, -1, -1, -1, -1, -1, -1],
     [-1, -1, -1, -1, -1, -1, -1, -1, -1]
 ];
-let flag = true;
 
 function App() {
-    const [sudoku, setSudoku] = useState(getSudokuBox(board));
-    const [preSudoku, setPreSudoku] = useState(getSudokuBox(board));
+    const [sudoku, setSudoku] = useState(getSudokuBox(emptySudoku));
+    const [preSudoku, setPreSudoku] = useState(getSudokuBox(emptySudoku));
 
     function getSudokuBox(board) {
         return JSON.parse(JSON.stringify(board));
     }
 
 
-    // Check that it is safe to fill that number .
     function isSafe(board, row, col, num) {
         // check that number virtically and horizontally.
         for (let i = 0; i < 9; i++) {
@@ -47,12 +44,10 @@ function App() {
         return true;
     }
 
-    // recurrsive function using backtracking
     function solveNext(board, row, col) {
-        if (row == 9)   // if we solve the entire board
+        if (row == 9)   
             return true;
-
-        //  defining the next position
+            
         let nextRow, nextCol;
         if (col == 8) {
             nextRow = row + 1;
@@ -62,12 +57,11 @@ function App() {
             nextCol = col + 1;
         }
 
-        // check if the current position is fillable or not
         if (board[row][col] != -1) {
             return solveNext(board, nextRow, nextCol);
         } else {
             for (let num = 1; num <= 9; num++) {
-                if (isSafe(board, row, col, num)) {   // checking is this number is safe to fill here
+                if (isSafe(board, row, col, num)) {   
                     board[row][col] = num;
                     if (solveNext(board, nextRow, nextCol)) {
                         return true;
@@ -80,60 +74,58 @@ function App() {
         return false;
     }
 
-    function solverSudoku(sudokuboard) {
-        if (solveNext(sudokuboard, 0, 0)) {
+    function solveSudoku(board) {
+        if (solveNext(board, 0, 0)) {
             console.log("there is solution");
-            return sudokuboard;
+            return board;
         } else {
             console.log("not solution");
-            return board;
+            return emptySudoku;
         }
     }
 
-    function checkPosition(board, row, col){
-        console.log(row+" "+col+ " check poi")
+    function isPositionValid(board, row, col) {
+        // console.log(row + " " + col + " check poi")
         let num = board[row][col];
-        for(let i=0; i<9; i++){
-            if(i != row){
-                if(board[i][col] == num){
-                    console.log(i+" "+col+" false 1")
-                    return false;}
+        for (let i = 0; i < 9; i++) {
+            if (i != row) {
+                if (board[i][col] == num) {
+                    // console.log(i + " " + col + " false 1")
+                    return false;
+                }
             }
-            if(i != col){
-                if(board[row][i] == num){
-                console.log("false 2")
-                    return false}
+            if (i != col) {
+                if (board[row][i] == num) {
+                    // console.log("false 2")
+                    return false
+                }
             }
         }
 
-        let pr = (Math.floor(row/3))*3;
-        let pc = (Math.floor(col/3))*3;
-        console.log("pr = "+pr+"  pc = "+pc)
+        let rowStart = (Math.floor(row / 3)) * 3;
+        let colStart = (Math.floor(col / 3)) * 3;
+        // console.log("pr = " + rowStart + "  pc = " + colStart)
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
-                if (board[pr + i][pc + j] == num){
-                    if(pr+i != row || pc+j != col){
-                        console.log(i +" % "+ row);
-                        console.log(pr+i+ " @ "+ (pc+j))
-                        console.log(board[pr + i][pc + j]+" false-3")
+                if (board[rowStart + i][colStart + j] == num) {
+                    if (rowStart + i != row || colStart + j != col) {
                         return false;
                     }
                 }
             }
         }
-        console.log("true")
 
         return true;
     }
 
-    function checkSudoku(checkingsudoku){
-        console.log("check")
-        for(let i=0; i<9; i++){
-            for(let j=0; j<9; j++){
+    function isSudokuValid(board) {
+        // console.log("check")
+        for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
                 // console.log(i+" "+j+" "+checkingsudoku[i][j])
-                if(checkingsudoku[i][j] != -1){
-                    console.log(i+" "+j+" ")
-                    if(!checkPosition(checkingsudoku, i, j))
+                if (board[i][j] != -1) {
+                    // console.log(i + " " + j + " ")
+                    if (!isPositionValid(board, i, j))
                         return false;
                 }
             }
@@ -141,21 +133,19 @@ function App() {
         return true
     }
 
-    function solveGrid() {
-        if(checkSudoku(sudoku)){
+    function startSolution() {
+        if (isSudokuValid(sudoku)) {
             setPreSudoku(sudoku);
-            let newgrid = solverSudoku(getSudokuBox(sudoku));
-            if(newgrid[0][0] === -1){
-                setSudoku(board);
-                setPreSudoku(board);
+            let solvedSudoku = solveSudoku(getSudokuBox(sudoku));
+            if (solvedSudoku[0][0] === -1) {
+                reset();
                 console.log("no solution possible");
             }
-            setSudoku(newgrid);
+            setSudoku(solvedSudoku);
         }
         else {
-            setSudoku(board);
-            setPreSudoku(board);
-            console.log("no hehehehe solution possible");
+            reset();
+            console.log("Given Sudoku is not valid!");
         }
     }
 
@@ -166,16 +156,16 @@ function App() {
 
         let val = parseInt(e.target.value) || -1;
         // console.log(val)
-        if ( val >= 1 && val <= 9) {
+        if (val >= 1 && val <= 9) {
             grid[row][col] = val;
             setSudoku(grid);
             // console.log("ok")
         }
     }
 
-    function reset(){
-        setSudoku(board);
-        setPreSudoku(board);
+    function reset() {
+        setSudoku(emptySudoku);
+        setPreSudoku(emptySudoku);
     }
 
     return <div className="app">
@@ -187,7 +177,7 @@ function App() {
                         return <tr key={rindex} className={(row + 1) % 3 === 0 ? "bborder" : ""}>
                             {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((col, cindex) => {
                                 return <td key={rindex + cindex} className={(col + 1) % 3 === 0 ? "rborder" : ""}>
-                                    <input 
+                                    <input
                                         value={sudoku[row][col] === -1 ? "" : sudoku[row][col]}
                                         disabled={preSudoku[row][col] !== -1}
                                         className="cell"
@@ -200,8 +190,8 @@ function App() {
                 }
             </tbody>
         </table>
-        <button onClick={() => solveGrid()}>Solve</button>
-        <button onClick={()=> reset()}>Reset</button>
+        <button onClick={() => startSolution()}>Solve</button>
+        <button onClick={() => reset()}>Reset</button>
     </div>
 }
 

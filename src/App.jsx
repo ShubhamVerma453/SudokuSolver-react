@@ -18,7 +18,6 @@ let flag = true;
 function App() {
     const [sudoku, setSudoku] = useState(getSudokuBox(board));
     const [preSudoku, setPreSudoku] = useState(getSudokuBox(board));
-    const [saveSudoku, setSaveSudoku] = useState(getSudokuBox(board));
 
     function getSudokuBox(board) {
         return JSON.parse(JSON.stringify(board));
@@ -81,20 +80,83 @@ function App() {
         return false;
     }
 
-    function solverSudoku(board) {
-        if (solveNext(board, 0, 0)) {
-            // console.log("there is solution");
+    function solverSudoku(sudokuboard) {
+        if (solveNext(sudokuboard, 0, 0)) {
+            console.log("there is solution");
+            return sudokuboard;
         } else {
-            // console.log("not solution");
+            console.log("not solution");
+            return board;
         }
-        return board
+    }
+
+    function checkPosition(board, row, col){
+        console.log(row+" "+col+ " check poi")
+        let num = board[row][col];
+        for(let i=0; i<9; i++){
+            if(i != row){
+                if(board[i][col] == num){
+                    console.log(i+" "+col+" false 1")
+                    return false;}
+            }
+            if(i != col){
+                if(board[row][i] == num){
+                console.log("false 2")
+                    return false}
+            }
+        }
+
+        let pr = (Math.floor(row/3))*3;
+        let pc = (Math.floor(col/3))*3;
+        console.log("pr = "+pr+"  pc = "+pc)
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (board[pr + i][pc + j] == num){
+                    if(pr+i != row || pc+j != col){
+                        console.log(i +" % "+ row);
+                        console.log(pr+i+ " @ "+ (pc+j))
+                        console.log(board[pr + i][pc + j]+" false-3")
+                        return false;
+                    }
+                }
+            }
+        }
+        console.log("true")
+
+        return true;
+    }
+
+    function checkSudoku(checkingsudoku){
+        console.log("check")
+        for(let i=0; i<9; i++){
+            for(let j=0; j<9; j++){
+                // console.log(i+" "+j+" "+checkingsudoku[i][j])
+                if(checkingsudoku[i][j] != -1){
+                    console.log(i+" "+j+" ")
+                    if(!checkPosition(checkingsudoku, i, j))
+                        return false;
+                }
+            }
+        }
+        return true
     }
 
     function solveGrid() {
-        setPreSudoku(sudoku);
-        let newgrid = solverSudoku(getSudokuBox(sudoku));
-        // console.log(newgrid);
-        setSudoku(newgrid);
+        if(checkSudoku(sudoku)){
+            setPreSudoku(sudoku);
+            let newgrid = solverSudoku(getSudokuBox(sudoku));
+            if(newgrid[0][0] === -1){
+                setSudoku(board);
+                setPreSudoku(board);
+                console.log("no solution possible");
+            }
+            setSudoku(newgrid);
+        }
+        else {
+            setSudoku(board);
+            setPreSudoku(board);
+            console.log("no hehehehe solution possible");
+        }
     }
 
     function onChangeSudoku(e, row, col) {
@@ -103,7 +165,7 @@ function App() {
         setSudoku(grid);
 
         let val = parseInt(e.target.value) || -1;
-        console.log(val)
+        // console.log(val)
         if ( val >= 1 && val <= 9) {
             grid[row][col] = val;
             setSudoku(grid);

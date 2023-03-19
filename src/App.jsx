@@ -5,10 +5,23 @@ import Footer from "./components/Footer";
 function App (){
     
 
-    return <div>
+    return <div className="app">
         <Header />
-            <h1>this is h1</h1>
-        <Footer />
+        <table>
+            <tbody>
+                {
+                    [1,2,3,4,5,6,7,8,9].map((row, rindex)=>{
+                        return <tr key={rindex}>
+                        {[1,2,3,4,5,6,7,8,9].map((col, cindex)=>{
+                            return <td key={rindex+cindex}>
+                                <input className="cell" />
+                            </td>
+                        })}
+                        </tr>
+                    })
+                }
+            </tbody>
+        </table>
         </div>
 }
 

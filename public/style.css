@@ -22,3 +22,10 @@ table{
 td{
     padding: 0;
 }
+.bborder{
+    border-bottom: 3px solid black;
+}
+
+.rborder{
+    border-right: 3px solid black;
+}

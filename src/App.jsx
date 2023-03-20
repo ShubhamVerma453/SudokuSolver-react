@@ -21,7 +21,6 @@ function App() {
         return JSON.parse(JSON.stringify(board));
     }
 
-
     function isSafe(board, row, col, num) {
         // check that number virtically and horizontally.
         for (let i = 0; i < 9; i++) {
@@ -190,8 +189,10 @@ function App() {
                 }
             </tbody>
         </table>
+        <div>
         <button onClick={() => startSolution()}>Solve</button>
         <button onClick={() => reset()}>Reset</button>
+        </div>
     </div>
 }
 
